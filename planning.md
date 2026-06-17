@@ -15,7 +15,7 @@ You must have at least 3 tools. The three required tools are listed — add any 
 ### Tool 1: search_listings
 
 **What it does:**
-<!-- Describe what this tool does in 1–2 sentences -->
+The tool searches for second-hand item listings 
 
 **Input parameters:**
 <!-- List each parameter, its type, and what it represents -->
@@ -140,13 +140,25 @@ Write out what a full user interaction looks like from start to finish — tool 
 **Example user query:** "I'm looking for a vintage graphic tee under $30. I mostly wear baggy jeans and chunky sneakers. What's out there and how would I style it?"
 
 **Step 1:**
-<!-- What does the agent do first? Which tool is called? With what input? -->
+FitFindr first calls search_listings using the user’s requested item and filters. For this query, it would search for a vintage graphic tee with a maximum price of $30. If the user provided a size, color, brand, platform, or condition, those filters would also be passed into the tool.
 
+Example tool call:
+search_listings("vintage graphic tee", max_price=30.0)
 **Step 2:**
-<!-- What happens next? What was returned from step 1? What tool is called now? -->
+If matching listings are found, FitFindr reviews the returned listings and selects the strongest match based on relevance to the user’s request. For example, it might choose a listing like "Faded Band Tee — $22, Depop, Good condition.
+
+FitFindr then calls suggest_outfit using the selected listing as the new item and the user’s wardrobe as input. This tool recommends how to style the new item with clothing the user already owns, such as baggy jeans and chunky sneakers.
+
+Example tool call:
+suggest_outfit(new_item=<selected listing>, wardrobe=<user wardrobe>)
 
 **Step 3:**
-<!-- Continue until the full interaction is complete -->
+After receiving the outfit suggestion, FitFindr calls create_fit_card to turn the outfit into a short, shareable fit description or caption.
 
+Example tool call:
+create_fit_card(outfit=<outfit suggestion>, new_item=<selected listing>)
 **Final output to user:**
-<!-- What does the user actually see at the end? -->
+FitFindr returns the best listing, explains how to style it with the user’s wardrobe, and includes a fit card. For example, it might say: "I found a faded band tee for $22 on Depop in good condition. Pair it with your wide-leg jeans and chunky sneakers for a relaxed 90s-inspired look. Fit card: thrifted this faded band tee off Depop for $22 and honestly it was made for my wide-legs."
+
+Error path:
+If search_listings does not return any matching listings, FitFindr should not continue to suggest_outfit or create_fit_card. Instead, it should tell the user that no results matched their request and suggest broadening the search, such as increasing the budget, removing a size filter, or using a more general keyword.
