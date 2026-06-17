@@ -154,15 +154,28 @@ def suggest_outfit(new_item: dict, wardrobe: dict) -> str:
         A concise outfit suggestion string.
 
     Failure mode:
-        If wardrobe["items"] is empty, returns a clear error message string
-        instead of crashing or calling the LLM with no wardrobe context.
+        If wardrobe["items"] is empty, asks the LLM for general styling advice
+        instead of crashing or returning an empty string.
     """
     wardrobe_items = wardrobe.get("items", []) if isinstance(wardrobe, dict) else []
     if not wardrobe_items:
-        return (
-            "I found a listing, but I could not create an outfit from your wardrobe. "
-            "Try adding more wardrobe basics, shoes, or accessories."
-        )
+        prompt = f"""
+The user is considering this second-hand item, but their wardrobe is empty:
+
+- Title: {new_item.get("title", "Unknown item")}
+- Category: {new_item.get("category", "Unknown category")}
+- Brand: {new_item.get("brand") or "Unknown brand"}
+- Colors: {", ".join(new_item.get("colors", [])) or "Unknown colors"}
+- Style tags: {", ".join(new_item.get("style_tags", [])) or "No tags"}
+- Condition: {new_item.get("condition", "Unknown condition")}
+- Price: ${new_item.get("price", "Unknown price")}
+- Platform: {new_item.get("platform", "Unknown platform")}
+
+Suggest 1-2 general outfit ideas using common wardrobe basics, shoes, and accessories.
+Make it clear these are general styling suggestions because no saved wardrobe items are available.
+Keep the advice concise, practical, and specific to the item.
+""".strip()
+        return _call_groq(prompt, temperature=0.75)
 
     item_details = f"""
 New thrifted item:

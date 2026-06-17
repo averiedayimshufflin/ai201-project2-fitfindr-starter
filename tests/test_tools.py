@@ -46,12 +46,21 @@ def test_suggest_outfit_calls_llm(monkeypatch):
     assert "User wardrobe:" in calls[0]["prompt"]
 
 
-def test_suggest_outfit_empty_wardrobe_returns_error():
+def test_suggest_outfit_empty_wardrobe_returns_general_advice(monkeypatch):
+    calls = []
+
+    def fake_call_groq(prompt, temperature=0.7):
+        calls.append({"prompt": prompt, "temperature": temperature})
+        return "Try it with straight-leg jeans, simple sneakers, and a cropped jacket."
+
+    monkeypatch.setattr("tools._call_groq", fake_call_groq)
     new_item = search_listings("vintage graphic tee", max_price=50)[0]
 
     result = suggest_outfit(new_item, {"items": []})
 
-    assert "could not create an outfit" in result
+    assert "straight-leg jeans" in result
+    assert len(calls) == 1
+    assert "wardrobe is empty" in calls[0]["prompt"]
 
 
 def test_create_fit_card_calls_llm(monkeypatch):
