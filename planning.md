@@ -244,6 +244,8 @@ I will use ChatGPT or Claude to help implement the planning loop.
 
 I will give the AI tool the Planning Loop section, State Management section, Error Handling table, and Architecture diagram. I expect it to create a `run_agent()` function that calls the tools in order, stores results in the session, and stops early when an error happens.
 
+For parsing the user's query, I will use a small deterministic regex parser instead of an LLM. It extracts `max_price` from phrases like "under $30" and `size` from phrases like "size M", then removes those phrases from the query to create the item `description`.
+
 I will verify the output by checking that:
 
 * `search_listings` runs before `suggest_outfit`
